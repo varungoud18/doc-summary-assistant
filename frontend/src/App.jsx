@@ -102,14 +102,14 @@ export default function App() {
     handleFile(f)
   }, [])
 
-  const onSubmit = async () => {
+  const generateSummary = async (targetLength = length) => {
     if (!file) return
     setStatus('loading')
     setError('')
 
     const form = new FormData()
     form.append('file', file)
-    form.append('length', length)
+    form.append('length', targetLength)
     form.append('provider', provider)
 
     try {
@@ -127,6 +127,16 @@ export default function App() {
       setError(err.message)
       setStatus('error')
     }
+  }
+
+  const onSubmit = () => {
+    generateSummary(length)
+  }
+
+  const handleLengthChange = (newLength) => {
+    if (newLength === length && status !== 'error') return
+    setLength(newLength)
+    generateSummary(newLength)
   }
 
   const handleCopy = () => {
@@ -241,13 +251,40 @@ export default function App() {
 
         {result && (
           <div className="result">
-            <div className="result-meta">
-              <span className="badge">{result.provider_used}</span>
-              {result.fallback && (
-                <span className="badge warn">fell back — original model failed</span>
-              )}
+            <div className="result-top-bar">
+              <div className="result-meta">
+                <span className="badge">{result.provider_used}</span>
+                {result.fallback && (
+                  <span className="badge warn">fell back — original model failed</span>
+                )}
+              </div>
+
+              <div className="result-length-controls">
+                <div className="pill-group mini">
+                  {LENGTHS.map((l) => (
+                    <button
+                      key={l.id}
+                      type="button"
+                      className={`pill ${length === l.id ? 'selected' : ''}`}
+                      disabled={status === 'loading'}
+                      onClick={() => handleLengthChange(l.id)}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            
+
+            {status === 'loading' && (
+              <div className="loading-banner">
+                <span className="spinner"></span>
+                <span>Generating {length} summary…</span>
+              </div>
+            )}
+
+            {error && <p className="error">{error}</p>}
+
             <div className="result-header">
               <h2>Summary</h2>
               <button className="copy-btn" onClick={handleCopy} title="Copy summary">
