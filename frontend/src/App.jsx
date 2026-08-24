@@ -9,14 +9,23 @@ const LENGTHS = [
 ]
 
 function parseSummary(raw) {
-  const keyIdx = raw.indexOf('Key Points:')
-  if (keyIdx === -1) return { summary: raw.trim(), points: [] }
-  const summary = raw.slice(0, keyIdx).replace('Summary:', '').trim()
-  const pointsBlock = raw.slice(keyIdx + 'Key Points:'.length)
+  if (!raw) return { summary: '', points: [] }
+  // Strip any reasoning / thinking tags (<think>...</think>)
+  const cleanRaw = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '').trim()
+
+  const keyIdx = cleanRaw.indexOf('Key Points:')
+  if (keyIdx === -1) {
+    const fallbackSummary = cleanRaw.replace(/^Summary:\s*/i, '').trim()
+    return { summary: fallbackSummary, points: [] }
+  }
+
+  const summary = cleanRaw.slice(0, keyIdx).replace(/^Summary:\s*/i, '').trim()
+  const pointsBlock = cleanRaw.slice(keyIdx + 'Key Points:'.length)
   const points = pointsBlock
     .split('\n')
-    .map((l) => l.replace(/^[-•]\s*/, '').trim())
-    .filter(Boolean)
+    .map((l) => l.replace(/^[-•*]\s*/, '').trim())
+    .filter((l) => l.length > 0 && !l.startsWith('Key Points:') && !l.toLowerCase().includes('format exactly as'))
+
   return { summary, points }
 }
 

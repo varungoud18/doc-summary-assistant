@@ -1,9 +1,5 @@
-"""
-Thin adapter over LLM providers (Groq, Gemini, GPT, Grok).
-Adding a provider means adding one branch here — the rest of the app never knows which model ran.
-"""
-
 import os
+import re
 import json
 import urllib.request
 import urllib.error
@@ -24,6 +20,17 @@ class SummarizationError(Exception):
     pass
 
 
+def _clean_summary(raw: str) -> str:
+    """Strips <think> tags, reasoning thoughts, and unwanted artifacts."""
+    if not raw:
+        return ""
+    # Strip <think>...</think> blocks from reasoning models
+    cleaned = re.sub(r"<think>[\s\S]*?</think>", "", raw, flags=re.IGNORECASE).strip()
+    # Strip any dangling think tags
+    cleaned = re.sub(r"</?think>", "", cleaned, flags=re.IGNORECASE).strip()
+    return cleaned
+
+
 def summarize(text: str, length: str, provider: str = "groq") -> str:
     if provider not in VALID_PROVIDERS:
         raise SummarizationError(f"Unsupported provider: {provider}")
@@ -34,13 +41,14 @@ def summarize(text: str, length: str, provider: str = "groq") -> str:
 
     try:
         if provider == "groq":
-            return _summarize_groq(prompt)
+            res = _summarize_groq(prompt)
         elif provider == "gemini":
-            return _summarize_gemini(prompt)
+            res = _summarize_gemini(prompt)
         elif provider == "gpt":
-            return _summarize_gpt(prompt)
+            res = _summarize_gpt(prompt)
         elif provider == "grok":
-            return _summarize_grok(prompt)
+            res = _summarize_grok(prompt)
+        return _clean_summary(res)
     except SummarizationError:
         raise
     except Exception as e:
@@ -52,11 +60,15 @@ def _build_prompt(text: str, length: str) -> str:
     # Cap input to keep requests fast and within free-tier context limits
     truncated = text[:15000]
     return (
-        "Summarize the following document.\n"
-        f"Length: {guidance}\n"
-        "Format your response as:\n"
-        "Summary: <the summary>\n"
-        "Key Points:\n- <point>\n- <point>\n\n"
+        "You are an expert document summarizer. Summarize the following document directly.\n"
+        "IMPORTANT: Provide ONLY the final summary. Do NOT include any internal reasoning, thoughts, or <think> tags.\n\n"
+        f"Length requirement: {guidance}\n\n"
+        "Strictly use this format:\n"
+        "Summary: <your clean summary text>\n"
+        "Key Points:\n"
+        "- <bullet point 1>\n"
+        "- <bullet point 2>\n"
+        "- <bullet point 3>\n\n"
         f"Document:\n{truncated}"
     )
 
