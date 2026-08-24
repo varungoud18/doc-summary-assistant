@@ -73,11 +73,11 @@ def _summarize_groq(prompt: str) -> str:
         "User-Agent": "DocSummaryAssistant/1.0",
     }
 
-    # Available high-speed production models on Groq
+    # Verified active production models on Groq
     candidate_models = [
         "llama-3.1-8b-instant",
-        "llama3-70b-8192",
-        "llama3-8b-8192",
+        "llama-3.3-70b-versatile",
+        "gemma2-9b-it",
         "mixtral-8x7b-32768",
     ]
 
@@ -100,12 +100,11 @@ def _summarize_groq(prompt: str) -> str:
         except urllib.error.HTTPError as e:
             error_body = e.read().decode("utf-8", errors="ignore")
             last_err = f"Groq API error ({e.code}) with model {model}: {error_body}"
-            # If model not found or deprecated, try next model
-            if e.code == 404:
-                continue
-            raise SummarizationError(last_err)
+            # Continue to next model on 400 (decommissioned), 404 (not found), or 429 (rate limit)
+            continue
         except Exception as e:
-            raise SummarizationError(f"Groq request failed: {e}")
+            last_err = f"Groq request error with model {model}: {e}"
+            continue
 
     raise SummarizationError(last_err or "All candidate Groq models failed")
 

@@ -65,8 +65,8 @@ async def summarize_document(
                     "fallback": True,
                     "original_error": str(e),
                 }
-            except SummarizationError:
-                pass
+            except SummarizationError as gemini_err:
+                raise HTTPException(502, f"{provider} failed ({e}) and Gemini fallback failed ({gemini_err})")
         raise HTTPException(502, str(e))
 
     return {"summary": result, "provider_used": provider, "fallback": False}
