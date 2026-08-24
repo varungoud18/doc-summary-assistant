@@ -1,33 +1,49 @@
 # Document Summary Assistant
 
-Upload a PDF or scanned image, pick a summary length, and get a fast summary with key points powered by Groq (Llama 3.3 70B) with Gemini fallback.
+An AI-powered document summarizer that extracts text from PDFs and scanned images, providing structured summaries with key bullet points. Powered by **Groq** for high-speed inference with automatic fallback to **Google Gemini 3**.
 
-## Stack
+---
 
-- **Backend:** FastAPI, pdfplumber (PDF text extraction), Cloud Vision OCR via Gemini (images & scanned PDFs)
-- **Frontend:** React + Vite, clean styling (no external CSS framework)
-- **Model:** Groq (`llama-3.3-70b-versatile`) as Primary, Gemini (`gemini-1.5-flash`) as Fallback
+## Features
+
+- **Multi-Format Support:** Handles standard PDFs, scanned documents, and images (`.png`, `.jpg`, `.jpeg`, `.webp`) up to **50 MB**.
+- **Cloud-Native AI OCR:** Zero OS-level binary dependencies (no local Tesseract installation needed) — works seamlessly in any cloud or client environment.
+- **Dual-Model Architecture:**
+  - **Primary:** High-speed inference via **Groq** (`openai/gpt-oss-20b`, `qwen/qwen3.6-27b`, `llama-3.1-8b-instant`).
+  - **Fallback:** Google **Gemini 3** (`gemini-3.7-flash`, `gemini-3.6-flash`).
+- **Interactive Length Switching:** Switch between **Short**, **Medium**, and **Long** summaries directly from the results screen with instant re-generation.
+- **Clean Markdown Formatting:** Automatic sanitization of reasoning tags, thinking traces, and formatting artifacts.
+- **Dark & Light Mode:** Sleek SaaS UI with copy-to-clipboard functionality and drag-and-drop file upload.
+
+---
+
+## Tech Stack
+
+- **Backend:** FastAPI, Python 3.11+, pdfplumber, Pillow, Google Generative AI, Groq / OpenAI REST API.
+- **Frontend:** React + Vite, Vanilla CSS design tokens (zero heavy CSS framework bloat).
+- **Deployment:** Render (Backend API) & Vercel (Frontend UI).
+
+---
 
 ## Local Setup
 
-### Backend
+### 1. Backend Setup
 
 ```bash
 cd backend
 python -m venv venv
+
 # On Windows:
 venv\Scripts\activate
 # On macOS/Linux:
 source venv/bin/activate
 
 pip install -r requirements.txt
-cp .env.example .env   # Fill in your GEMINI_API_KEY
+cp .env.example .env   # Fill in your GROQ_API_KEY and GEMINI_API_KEY
 uvicorn main:app --reload --port 8000
 ```
 
-> **Note:** No local Tesseract installation or OS-level binaries are required! Image OCR and scanned PDF processing are handled natively via Cloud Vision (Gemini / OpenAI), making it 100% portable for any device, serverless platform, or cloud deployment.
-
-### Frontend
+### 2. Frontend Setup
 
 ```bash
 cd frontend
@@ -37,32 +53,44 @@ echo "VITE_API_BASE_URL=http://localhost:8000" > .env
 npm run dev
 ```
 
-### Run Everything Together (Windows)
-Double-click the `run.bat` script in the root directory to launch both the backend and frontend at the same time.
+### 3. Run Everything Together (Windows)
+Double-click the **`run.bat`** script in the project root to start both the backend and frontend simultaneously.
+
+---
 
 ## Deployment
 
-- **Backend → Render:** New Web Service from this repo.
-  - Root directory: `backend`
-  - Build command: `pip install -r requirements.txt`
-  - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-  - Environment Variables: Set `GROQ_API_KEY`, `GEMINI_API_KEY`, and `ALLOWED_ORIGINS=*`.
+### Backend → Render
+1. Create a **New Web Service** from your GitHub repository.
+   - **Root Directory:** `backend`
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+2. Under **Environment Variables**, add:
+   - `GROQ_API_KEY`: Your Groq API key
+   - `GEMINI_API_KEY`: Your Gemini API key
+   - `ALLOWED_ORIGINS`: `*`
 
-- **Frontend → Vercel:** Import this repository.
-  - Root directory: `frontend`
-  - Framework preset: `Vite`
-  - Environment Variable: Set `VITE_API_BASE_URL` to your live Backend URL.
+### Frontend → Vercel
+1. Import your GitHub repository into **Vercel**.
+   - **Root Directory:** `frontend`
+   - **Framework Preset:** `Vite`
+2. Under **Environment Variables**, add:
+   - `VITE_API_BASE_URL`: `https://your-render-backend.onrender.com`
 
-## Approach & Design
+---
 
-The application extracts text from uploaded documents (using `pdfplumber` for text PDFs and Cloud Vision AI for image OCR / scanned PDFs), then generates structured summaries with key bullet points.
+## Architecture & Data Flow
 
-* **Length Options:** Summary length is handled through dynamic system prompts rather than separate processing pipelines.
-* **Modern Interface:** Built with a professional, dark-mode design system following human-crafted SaaS layouts (Linear/Stripe style) featuring optimized contrasts, smooth drag-and-drop actions, and a copy-to-clipboard utility.
-* **Error Handling:** Actionable user feedback is provided for failed extractions (e.g. empty files, unreadable formats).
-
-## Known Limitations
-
-- Large PDFs are truncated to stay within free-tier context limits.
-- No session persistence — summaries are not saved between browser refreshes.
+```mermaid
+graph LR
+    A[User Upload: PDF / Image] --> B[FastAPI Backend]
+    B -->|Text Layer| C[pdfplumber]
+    B -->|Scanned / Image| D[Cloud Vision AI OCR]
+    C --> E[Groq Primary Summarizer]
+    D --> E
+    E -->|On Failure / Limit| F[Gemini 3 Fallback]
+    E --> G[Sanitized Summary & Key Points]
+    F --> G
+    G --> H[Interactive React UI]
+```
 
