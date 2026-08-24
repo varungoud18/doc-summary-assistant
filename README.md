@@ -1,50 +1,72 @@
 # Document Summary Assistant
 
-Upload a PDF or scanned image, pick a summary length and a model (Gemini, GPT, or Grok), and get a summary with key points.
+Upload a PDF or scanned image, pick a summary length, and get a summary with key points powered by Gemini.
 
 ## Stack
 
-- **Backend:** FastAPI, pdfplumber (PDF text), pytesseract (OCR for images)
-- **Frontend:** React + Vite, no UI framework
-- **Models:** Gemini (`google-generativeai`), GPT (`openai`), Grok (xAI's OpenAI-compatible API) — selected per request, with automatic fallback to Gemini if the chosen model's call fails
+- **Backend:** FastAPI, pdfplumber (PDF text extraction), pytesseract (OCR for scanned images)
+- **Frontend:** React + Vite, clean styling (no external CSS framework)
+- **Model:** Gemini (`google-generativeai`)
 
-## Local setup
+## Local Setup
 
 ### Backend
 
 ```bash
 cd backend
-python -m venv venv && source venv/bin/activate   # Windows: venv\Scripts\activate
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+
 pip install -r requirements.txt
-cp .env.example .env   # fill in the keys you have
+cp .env.example .env   # Fill in your GEMINI_API_KEY
 uvicorn main:app --reload --port 8000
 ```
 
 Tesseract must also be installed on your system (not a Python package):
+- Windows: Install from the [Tesseract UB Mannheim build](https://github.com/UB-Mannheim/tesseract/wiki)
 - macOS: `brew install tesseract`
 - Ubuntu: `sudo apt install tesseract-ocr`
-- Windows: install from the [Tesseract UB Mannheim build](https://github.com/UB-Mannheim/tesseract/wiki)
 
 ### Frontend
 
 ```bash
 cd frontend
 npm install
+# Create local env file:
 echo "VITE_API_BASE_URL=http://localhost:8000" > .env
 npm run dev
 ```
 
+### Run Everything Together (Windows)
+Double-click the `run.bat` script in the root directory to launch both the backend and frontend at the same time.
+
 ## Deployment
 
-- **Backend → Render:** New Web Service from this repo, root directory `backend`, build command `pip install -r requirements.txt`, start command `uvicorn main:app --host 0.0.0.0 --port $PORT`. Add a build step or buildpack for Tesseract (Render's native runtime needs `apt-get install tesseract-ocr` via a `render-build.sh`, or use a Docker deploy with a Debian base image that installs it). Set the API keys and `ALLOWED_ORIGINS` as environment variables.
-- **Frontend → Vercel:** import the repo, root directory `frontend`, framework preset Vite. Set `VITE_API_BASE_URL` to the deployed Render URL.
+- **Backend → Render:** New Web Service from this repo.
+  - Root directory: `backend`
+  - Build command: `pip install -r requirements.txt`
+  - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+  - Environment Variables: Set `GEMINI_API_KEY` and `ALLOWED_ORIGINS=*`.
+  *(Note: Render's native environment requires a build script to install the tesseract-ocr system package for OCR support, or a Docker deploy).*
 
-## Approach (write-up)
+- **Frontend → Vercel:** Import this repository.
+  - Root directory: `frontend`
+  - Framework preset: `Vite`
+  - Environment Variable: Set `VITE_API_BASE_URL` to your Render backend URL.
 
-The app extracts text from uploads (pdfplumber for PDFs, Tesseract OCR for images), then sends it to one of three LLM providers behind a single adapter function, so switching models is a one-line change and adding a new one doesn't touch the API contract. Summary length is expressed as prompt guidance rather than three separate pipelines, keeping the surface area small. If a chosen provider fails (missing key, rate limit, outage), the backend retries once with Gemini so a demo doesn't break on a single flaky call. The frontend is one page: drag-and-drop upload, two pill selectors, a loading state, and a results view — no routing, auth, or persistence, since the brief doesn't call for any of that. Error handling surfaces specific, actionable messages (e.g. "this PDF has no text layer — try uploading it as an image") rather than generic failures.
+## Approach & Design
 
-## Known limitations
+The application extracts text from uploaded documents (using `pdfplumber` for text PDFs and `pytesseract` for image OCR), then sends the text to the Google Gemini API to generate structured summaries.
 
-- Large PDFs are truncated to ~15k characters before summarization to stay within free-tier context limits.
-- No persistence — summaries aren't saved between sessions.
-- Grok access requires an xAI API key with available credit; the free tier has changed over time, worth checking current terms.
+* **Length Options:** Summary length is handled through dynamic system prompts rather than separate processing pipelines.
+* **Modern Interface:** Built with a professional, dark-mode design system following human-crafted SaaS layouts (Linear/Stripe style) featuring optimized contrasts, smooth drag-and-drop actions, and a copy-to-clipboard utility.
+* **Error Handling:** Actionable user feedback is provided for failed extractions (e.g. empty files, unreadable formats).
+
+## Known Limitations
+
+- Large PDFs are truncated to stay within free-tier context limits.
+- No session persistence — summaries are not saved between browser refreshes.
+
