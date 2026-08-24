@@ -252,13 +252,6 @@ export default function App() {
         {result && (
           <div className="result">
             <div className="result-top-bar">
-              <div className="result-meta">
-                <span className="badge">{result.provider_used}</span>
-                {result.fallback && (
-                  <span className="badge warn">fell back — original model failed</span>
-                )}
-              </div>
-
               <div className="result-length-controls">
                 <div className="pill-group mini">
                   {LENGTHS.map((l) => (
