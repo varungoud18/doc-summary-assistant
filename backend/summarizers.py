@@ -1,13 +1,13 @@
 """
-Thin adapter over three LLM providers. Adding a provider means adding
-one branch here — the rest of the app never knows which model ran.
+Thin adapter over LLM providers (Groq, Gemini, GPT, Grok).
+Adding a provider means adding one branch here — the rest of the app never knows which model ran.
 """
 
 import os
 import google.generativeai as genai
 from openai import OpenAI
 
-VALID_PROVIDERS = {"gemini", "gpt", "grok"}
+VALID_PROVIDERS = {"groq", "gemini", "gpt", "grok"}
 VALID_LENGTHS = {"short", "medium", "long"}
 
 LENGTH_GUIDANCE = {
@@ -21,7 +21,7 @@ class SummarizationError(Exception):
     pass
 
 
-def summarize(text: str, length: str, provider: str) -> str:
+def summarize(text: str, length: str, provider: str = "groq") -> str:
     if provider not in VALID_PROVIDERS:
         raise SummarizationError(f"Unsupported provider: {provider}")
     if length not in VALID_LENGTHS:
@@ -30,7 +30,9 @@ def summarize(text: str, length: str, provider: str) -> str:
     prompt = _build_prompt(text, length)
 
     try:
-        if provider == "gemini":
+        if provider == "groq":
+            return _summarize_groq(prompt)
+        elif provider == "gemini":
             return _summarize_gemini(prompt)
         elif provider == "gpt":
             return _summarize_gpt(prompt)
@@ -56,12 +58,28 @@ def _build_prompt(text: str, length: str) -> str:
     )
 
 
+def _summarize_groq(prompt: str) -> str:
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        raise SummarizationError("GROQ_API_KEY is not set")
+    # Groq OpenAI-compatible high-speed endpoint
+    client = OpenAI(
+        api_key=api_key,
+        base_url="https://api.groq.com/openai/v1",
+    )
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+    )
+    return response.choices[0].message.content
+
+
 def _summarize_gemini(prompt: str) -> str:
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         raise SummarizationError("GEMINI_API_KEY is not set")
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-3.6-flash")
+    model = genai.GenerativeModel("gemini-1.5-flash")
     response = model.generate_content(prompt)
     return response.text
 

@@ -1,12 +1,12 @@
 # Document Summary Assistant
 
-Upload a PDF or scanned image, pick a summary length, and get a summary with key points powered by Gemini.
+Upload a PDF or scanned image, pick a summary length, and get a fast summary with key points powered by Groq (Llama 3.3 70B) with Gemini fallback.
 
 ## Stack
 
-- **Backend:** FastAPI, pdfplumber (PDF text extraction), pytesseract (OCR for scanned images)
+- **Backend:** FastAPI, pdfplumber (PDF text extraction), Cloud Vision OCR via Gemini (images & scanned PDFs)
 - **Frontend:** React + Vite, clean styling (no external CSS framework)
-- **Model:** Gemini (`google-generativeai`)
+- **Model:** Groq (`llama-3.3-70b-versatile`) as Primary, Gemini (`gemini-1.5-flash`) as Fallback
 
 ## Local Setup
 
@@ -25,10 +25,7 @@ cp .env.example .env   # Fill in your GEMINI_API_KEY
 uvicorn main:app --reload --port 8000
 ```
 
-Tesseract must also be installed on your system (not a Python package):
-- Windows: Install from the [Tesseract UB Mannheim build](https://github.com/UB-Mannheim/tesseract/wiki)
-- macOS: `brew install tesseract`
-- Ubuntu: `sudo apt install tesseract-ocr`
+> **Note:** No local Tesseract installation or OS-level binaries are required! Image OCR and scanned PDF processing are handled natively via Cloud Vision (Gemini / OpenAI), making it 100% portable for any device, serverless platform, or cloud deployment.
 
 ### Frontend
 
@@ -49,17 +46,16 @@ Double-click the `run.bat` script in the root directory to launch both the backe
   - Root directory: `backend`
   - Build command: `pip install -r requirements.txt`
   - Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-  - Environment Variables: Set `GEMINI_API_KEY` and `ALLOWED_ORIGINS=*`.
-  *(Note: Render's native environment requires a build script to install the tesseract-ocr system package for OCR support, or a Docker deploy).*
+  - Environment Variables: Set `GROQ_API_KEY`, `GEMINI_API_KEY`, and `ALLOWED_ORIGINS=*`.
 
 - **Frontend → Vercel:** Import this repository.
   - Root directory: `frontend`
   - Framework preset: `Vite`
-  - Environment Variable: Set `VITE_API_BASE_URL` to your Render backend URL.
+  - Environment Variable: Set `VITE_API_BASE_URL` to your live Backend URL.
 
 ## Approach & Design
 
-The application extracts text from uploaded documents (using `pdfplumber` for text PDFs and `pytesseract` for image OCR), then sends the text to the Google Gemini API to generate structured summaries.
+The application extracts text from uploaded documents (using `pdfplumber` for text PDFs and Cloud Vision AI for image OCR / scanned PDFs), then generates structured summaries with key bullet points.
 
 * **Length Options:** Summary length is handled through dynamic system prompts rather than separate processing pipelines.
 * **Modern Interface:** Built with a professional, dark-mode design system following human-crafted SaaS layouts (Linear/Stripe style) featuring optimized contrasts, smooth drag-and-drop actions, and a copy-to-clipboard utility.

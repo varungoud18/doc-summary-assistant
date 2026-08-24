@@ -2,9 +2,6 @@ import { useState, useCallback, useEffect } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
-// We only use Gemini now
-
-
 const LENGTHS = [
   { id: 'short', label: 'Short' },
   { id: 'medium', label: 'Medium' },
@@ -21,11 +18,13 @@ function parseSummary(raw) {
     .map((l) => l.replace(/^[-•]\s*/, '').trim())
     .filter(Boolean)
   return { summary, points }
-}export default function App() {
+}
+
+export default function App() {
   const [file, setFile] = useState(null)
   const [dragActive, setDragActive] = useState(false)
   const [length, setLength] = useState('medium')
-  const [provider, setProvider] = useState('gemini')
+  const [provider, setProvider] = useState('groq')
   const [status, setStatus] = useState('idle') // idle | loading | done | error
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')

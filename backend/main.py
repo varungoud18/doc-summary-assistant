@@ -11,10 +11,13 @@ from summarizers import summarize, SummarizationError, VALID_PROVIDERS, VALID_LE
 
 app = FastAPI(title="Document Summary Assistant")
 
-allowed_origins = os.environ.get("ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "*")
+allowed_origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()] if allowed_origins_env != "*" else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=allowed_origins if allowed_origins else ["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -31,7 +34,7 @@ def health():
 async def summarize_document(
     file: UploadFile = File(...),
     length: str = Form("medium"),
-    provider: str = Form("gemini"),
+    provider: str = Form("groq"),
 ):
     if length not in VALID_LENGTHS:
         raise HTTPException(400, f"length must be one of {sorted(VALID_LENGTHS)}")
@@ -52,7 +55,7 @@ async def summarize_document(
     try:
         result = summarize(text, length, provider)
     except SummarizationError as e:
-        # Fall back to Gemini once if the chosen provider fails and it wasn't already Gemini
+        # Fall back to Gemini if the chosen provider fails and it wasn't already Gemini
         if provider != "gemini" and os.environ.get("GEMINI_API_KEY"):
             try:
                 result = summarize(text, length, "gemini")
