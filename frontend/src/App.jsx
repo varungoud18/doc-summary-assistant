@@ -2,11 +2,8 @@ import { useState, useCallback } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
-const PROVIDERS = [
-  { id: 'gemini', label: 'Gemini' },
-  { id: 'gpt', label: 'GPT' },
-  { id: 'grok', label: 'Grok' },
-]
+// We only use Gemini now
+
 
 const LENGTHS = [
   { id: 'short', label: 'Short' },
@@ -90,7 +87,7 @@ export default function App() {
         <span className="mark">DS/A</span>
         <div>
           <h1>Document Summary Assistant</h1>
-          <p>Upload a PDF or scanned image. Pick a length and a model. Get a summary.</p>
+          <p>Upload a PDF or scanned image. Pick a length. Get a summary.</p>
         </div>
       </header>
 
@@ -144,21 +141,6 @@ export default function App() {
                 </div>
               </fieldset>
 
-              <fieldset>
-                <legend>Model</legend>
-                <div className="pill-group">
-                  {PROVIDERS.map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      className={`pill ${provider === p.id ? 'selected' : ''}`}
-                      onClick={() => setProvider(p.id)}
-                    >
-                      {p.label}
-                    </button>
-                  ))}
-                </div>
-              </fieldset>
             </div>
 
             {error && <p className="error">{error}</p>}
