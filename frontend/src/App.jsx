@@ -140,8 +140,13 @@ export default function App() {
   }
 
   const handleCopy = () => {
-    if (!result?.parsed?.summary) return
-    navigator.clipboard.writeText(result.parsed.summary)
+    if (!result?.parsed) return
+    const { summary, points } = result.parsed
+    let fullText = `Summary:\n${summary}`
+    if (points && points.length > 0) {
+      fullText += `\n\nKey Points:\n` + points.map((p) => `• ${p}`).join('\n')
+    }
+    navigator.clipboard.writeText(fullText)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
