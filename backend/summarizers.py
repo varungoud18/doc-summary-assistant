@@ -72,26 +72,42 @@ def _summarize_groq(prompt: str) -> str:
         "Content-Type": "application/json",
         "User-Agent": "DocSummaryAssistant/1.0",
     }
-    payload = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [{"role": "user", "content": prompt}],
-    }
 
-    try:
-        req = urllib.request.Request(
-            url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers=headers,
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            return data["choices"][0]["message"]["content"]
-    except urllib.error.HTTPError as e:
-        error_body = e.read().decode("utf-8", errors="ignore")
-        raise SummarizationError(f"Groq API error ({e.code}): {error_body}")
-    except Exception as e:
-        raise SummarizationError(f"Groq request failed: {e}")
+    # Available high-speed production models on Groq
+    candidate_models = [
+        "llama-3.1-8b-instant",
+        "llama3-70b-8192",
+        "llama3-8b-8192",
+        "mixtral-8x7b-32768",
+    ]
+
+    last_err = None
+    for model in candidate_models:
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        try:
+            req = urllib.request.Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers=headers,
+                method="POST",
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data["choices"][0]["message"]["content"]
+        except urllib.error.HTTPError as e:
+            error_body = e.read().decode("utf-8", errors="ignore")
+            last_err = f"Groq API error ({e.code}) with model {model}: {error_body}"
+            # If model not found or deprecated, try next model
+            if e.code == 404:
+                continue
+            raise SummarizationError(last_err)
+        except Exception as e:
+            raise SummarizationError(f"Groq request failed: {e}")
+
+    raise SummarizationError(last_err or "All candidate Groq models failed")
 
 
 def _summarize_gemini(prompt: str) -> str:
