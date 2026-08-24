@@ -89,9 +89,6 @@ function parseSummary(raw) {
 
   return (
     <div className="page">
-      {/* Dynamic ambient background blobs */}
-      <div className="bg-glow purple"></div>
-      <div className="bg-glow teal"></div>
 
       <header className="header">
         <div>
