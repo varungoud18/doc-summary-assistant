@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Document Summary Assistant - Project Overview Report</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    :root {
+      --primary: #0f172a;
+      --secondary: #0d9488;
+      --accent: #0284c7;
+      --text: #334155;
+      --text-muted: #64748b;
+      --bg-subtle: #f8fafc;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      line-height: 1.6;
+      background: #f1f5f9;
+      padding: 2rem 1rem;
+    }
+
+    .page {
+      max-width: 850px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 3rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01);
+    }
+
+    header {
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--primary);
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+      color: var(--secondary);
+      font-weight: 500;
+      margin-top: 0.25rem;
+    }
+
+    .meta {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      font-weight: 600;
+      color: var(--primary);
+      margin: 2rem 0 0.75rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h2::before {
+      content: "";
+      display: inline-block;
+      width: 4px;
+      height: 1.2rem;
+      background: var(--secondary);
+      border-radius: 2px;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+    }
+
+    ul {
+      margin-left: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    li {
+      margin-bottom: 0.4rem;
+      font-size: 0.93rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background-color: var(--primary);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:nth-child(even) {
+      background-color: var(--bg-subtle);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      background: #e0f2fe;
+      color: #0369a1;
+      font-weight: 600;
+      font-size: 0.75rem;
+      border-radius: 4px;
+    }
+
+    .badge-limit {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    @media print {
+      body {
+        background: #ffffff;
+        padding: 0;
+      }
+      .page {
+        box-shadow: none;
+        padding: 0;
+        max-width: 100%;
+      }
+      .no-print {
+        display: none;
+      }
+    }
+
+    .print-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--secondary);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .print-btn:hover {
+      background: #0f766e;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+
+  <button class="print-btn no-print" onclick="window.print()">🖨️ Save as PDF / Print</button>
+
+  <div class="page">
+    <header>
+      <h1>Document Summary Assistant</h1>
+      <div class="subtitle">System Architecture, Technical Overview, & Limitations Report</div>
+      <div class="meta">Generated: August 2026 | Document Version: 1.0</div>
+    </header>
+
+    <section>
+      <h2>1. Executive Overview & Theme</h2>
+      <p>
+        <strong>Document Summary Assistant</strong> is an AI-powered document processing and summarization platform. 
+        It ingests digital PDFs, scanned documents, and images, extracting textual contents using high-fidelity text layers 
+        or cloud-native multimodal vision OCR. It then outputs clean, structured Markdown summaries paired with key bullet points.
+      </p>
+      <p><strong>Core Design Principles:</strong></p>
+      <ul>
+        <li><strong>Zero Local Binary Bloat:</strong> Eliminates OS-level dependencies (like Tesseract OCR installations), making cloud deployments seamless on platforms like Render or Vercel.</li>
+        <li><strong>High-Speed AI Engine:</strong> Uses Groq REST API as primary inference provider for near-instant responses.</li>
+        <li><strong>Resilient Dual Architecture:</strong> Automatic transparent fallback to Google Gemini 3 if primary quota or API limits occur.</li>
+        <li><strong>Interactive Glassmorphic UX:</strong> Dynamic switching between Short, Medium, and Long summary formats.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>2. Technology Stack & Ecosystem</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Layer</th>
+            <th>Technology</th>
+            <th>Description & Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Frontend UI</strong></td>
+            <td>React 18 + Vite, Vanilla CSS</td>
+            <td>Single Page Application built with CSS design tokens, dynamic dark/light themes, and glassmorphic UI.</td>
+          </tr>
+          <tr>
+            <td><strong>Backend API</strong></td>
+            <td>FastAPI, Python 3.11+, Uvicorn</td>
+            <td>Asynchronous REST framework handling payload validation, file stream processing, and fallback orchestration.</td>
+          </tr>
+          <tr>
+            <td><strong>Text Layer Extraction</strong></td>
+            <td><code>pdfplumber</code></td>
+            <td>Fast text layer extraction for digital PDFs.</td>
+          </tr>
+          <tr>
+            <td><strong>Cloud Vision OCR</strong></td>
+            <td>Google Gemini Vision API / OpenAI Vision</td>
+            <td>Cloud-native multimodal vision transcription for scanned PDFs and image files (.png, .jpg, .jpeg, .webp).</td>
+          </tr>
+          <tr>
+            <td><strong>Primary LLM</strong></td>
+            <td>Groq API (Llama 3.3, Qwen 3.6, GPT-OSS)</td>
+            <td>Ultra-low latency text summarization with dynamic model fallback selection.</td>
+          </tr>
+          <tr>
+            <td><strong>Fallback LLM</strong></td>
+            <td>Google Gemini 3 (3.7-flash, 3.6-flash)</td>
+            <td>Secondary LLM engine triggered automatically on Groq API errors or rate limits.</td>
+          </tr>
+          <tr>
+            <td><strong>Deployment</strong></td>
+            <td>Render (API) & Vercel (UI)</td>
+            <td>Cloud deployment configuration via environment variables.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Technical Limitations & System Constraints</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Constraint Area</th>
+            <th>Limitation</th>
+            <th>Technical Details & Impact</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Context Window</strong></td>
+            <td><span class="badge badge-limit">60,000 Characters</span></td>
+            <td>Input text is truncated at 60k chars (~15k words). Large multi-chapter documents are truncated rather than processed via RAG.</td>
+          </tr>
+          <tr>
+            <td><strong>Data Persistence</strong></td>
+            <td><span class="badge badge-limit">Stateless In-Memory</span></td>
+            <td>No database (SQL/NoSQL) or session storage. Reloading the frontend clears state.</td>
+          </tr>
+          <tr>
+            <td><strong>Supported Formats</strong></td>
+            <td><span class="badge">PDF, PNG, JPG, JPEG, WEBP</span></td>
+            <td>Plain text (.txt), Markdown (.md), or Word (.docx) files are not accepted without prior conversion.</td>
+          </tr>
+          <tr>
+            <td><strong>API Key Dependency</strong></td>
+            <td><span class="badge">GROQ & GEMINI Keys</span></td>
+            <td>OCR and summarization rely completely on external API availability and key provisioning.</td>
+          </tr>
+          <tr>
+            <td><strong>Payload Size</strong></td>
+            <td><span class="badge badge-limit">50 MB Max</span></td>
+            <td>Upload payloads strictly capped at 50MB to protect memory on free hosting tiers.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <footer>
+      <span>Document Summary Assistant — Project Architecture Report</span>
+    </footer>
+  </div>
+
+</body>
+</html>

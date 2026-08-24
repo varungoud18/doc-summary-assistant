@@ -2,6 +2,10 @@
 
 An AI-powered document summarizer that extracts text from PDFs and scanned images, providing structured summaries with key bullet points. Powered by **Groq** for high-speed inference with automatic fallback to **Google Gemini 3**.
 
+> 📄 **Project Architecture & Technical Overview Report (PDF):**  
+> View the complete project report in [**`Document_Summary_Assistant_Overview.pdf`**](./Document_Summary_Assistant_Overview.pdf) or the printable [**`Document_Summary_Assistant_Overview.html`**](./Document_Summary_Assistant_Overview.html).  
+> To regenerate the PDF report anytime, run: `python generate_pdf.py`
+
 ---
 
 ## Features
