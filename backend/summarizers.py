@@ -61,6 +61,39 @@ def _build_prompt(text: str, length: str) -> str:
     )
 
 
+def _get_groq_models(api_key: str) -> list:
+    """Dynamically fetches active chat models from Groq or returns known latest models."""
+    defaults = [
+        "openai/gpt-oss-20b",
+        "openai/gpt-oss-120b",
+        "qwen/qwen3.6-27b",
+        "gemma2-9b-it",
+        "llama-3.1-8b-instant",
+        "llama-3.3-70b-versatile",
+    ]
+    try:
+        req = urllib.request.Request(
+            "https://api.groq.com/openai/v1/models",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "User-Agent": "DocSummaryAssistant/1.0",
+            },
+            method="GET",
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            # Filter out non-chat models (like audio/whisper or guard models)
+            active = [
+                m["id"] for m in data.get("data", [])
+                if "id" in m and not any(x in m["id"] for x in ["whisper", "guard", "embed", "tts"])
+            ]
+            if active:
+                return active
+    except Exception:
+        pass
+    return defaults
+
+
 def _summarize_groq(prompt: str) -> str:
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
@@ -73,13 +106,7 @@ def _summarize_groq(prompt: str) -> str:
         "User-Agent": "DocSummaryAssistant/1.0",
     }
 
-    # Verified active production models on Groq
-    candidate_models = [
-        "llama-3.1-8b-instant",
-        "llama-3.3-70b-versatile",
-        "gemma2-9b-it",
-        "mixtral-8x7b-32768",
-    ]
+    candidate_models = _get_groq_models(api_key)
 
     last_err = None
     for model in candidate_models:
@@ -114,9 +141,27 @@ def _summarize_gemini(prompt: str) -> str:
     if not api_key:
         raise SummarizationError("GEMINI_API_KEY is not set")
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
-    return response.text
+
+    gemini_candidates = [
+        "gemini-2.5-flash",
+        "gemini-2.0-flash",
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro",
+    ]
+
+    last_err = None
+    for m in gemini_candidates:
+        try:
+            model = genai.GenerativeModel(m)
+            response = model.generate_content(prompt)
+            if response and response.text:
+                return response.text
+        except Exception as e:
+            last_err = e
+            continue
+
+    raise SummarizationError(f"Gemini request failed: {last_err}")
 
 
 def _summarize_gpt(prompt: str) -> str:
