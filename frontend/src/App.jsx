@@ -203,7 +203,7 @@ export default function App() {
                       </svg>
                     </div>
                     <p className="drop-title">Drop a PDF or image here</p>
-                    <p className="hint">or click to browse — max 10MB</p>
+                    <p className="hint">or click to browse — max 50MB</p>
                   </>
                 )}
               </div>

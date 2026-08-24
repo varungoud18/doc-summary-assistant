@@ -71,7 +71,7 @@ def summarize(text: str, length: str, provider: str = "groq") -> str:
 
 def _build_prompt(text: str, length: str) -> str:
     guidance = LENGTH_GUIDANCE[length]
-    truncated = text[:15000]
+    truncated = text[:60000]
     return (
         "Summarize the following document directly without conversational filler or thought processes.\n\n"
         f"Length requirement: {guidance}\n\n"
