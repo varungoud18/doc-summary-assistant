@@ -16,19 +16,33 @@ LENGTH_GUIDANCE = {
 }
 
 
-class SummarizationError(Exception):
-    pass
-
-
 def _clean_summary(raw: str) -> str:
-    """Strips <think> tags, reasoning thoughts, and unwanted artifacts."""
+    """Strips <think> tags, reasoning thoughts, thinking preambles, and unwanted artifacts."""
     if not raw:
         return ""
+
+    text = raw
+
     # Strip <think>...</think> blocks from reasoning models
-    cleaned = re.sub(r"<think>[\s\S]*?</think>", "", raw, flags=re.IGNORECASE).strip()
-    # Strip any dangling think tags
-    cleaned = re.sub(r"</?think>", "", cleaned, flags=re.IGNORECASE).strip()
-    return cleaned
+    text = re.sub(r"<think>[\s\S]*?</think>", "", text, flags=re.IGNORECASE).strip()
+    text = re.sub(r"</?think>", "", text, flags=re.IGNORECASE).strip()
+
+    # If the model included a thinking preamble like "Here's a thinking process: ...",
+    # find where the actual summary starts (Summary:)
+    summary_matches = list(re.finditer(r"(?:^|\n)\s*(?:\*\*)?Summary(?:\*\*)?\s*:\s*", text, flags=re.IGNORECASE))
+    if summary_matches:
+        # Take the last or most appropriate Summary block if preamble echoed earlier
+        last_match = summary_matches[-1]
+        text = text[last_match.start():].strip()
+
+    # Clean out any literal placeholder lines the model might have echoed
+    text = re.sub(r"^[-•*]\s*<bullet point\s*\d*>.*$", "", text, flags=re.MULTILINE | re.IGNORECASE)
+    text = re.sub(r"^[-•*]\s*\[(?:First|Second|Third|bullet|Key).*?\].*$", "", text, flags=re.MULTILINE | re.IGNORECASE)
+
+    # Clean double bullet markers
+    text = re.sub(r"^[-•*]\s*[-•*]\s*", "- ", text, flags=re.MULTILINE)
+
+    return text.strip()
 
 
 def summarize(text: str, length: str, provider: str = "groq") -> str:
@@ -57,18 +71,17 @@ def summarize(text: str, length: str, provider: str = "groq") -> str:
 
 def _build_prompt(text: str, length: str) -> str:
     guidance = LENGTH_GUIDANCE[length]
-    # Cap input to keep requests fast and within free-tier context limits
     truncated = text[:15000]
     return (
-        "You are an expert document summarizer. Summarize the following document directly.\n"
-        "IMPORTANT: Provide ONLY the final summary. Do NOT include any internal reasoning, thoughts, or <think> tags.\n\n"
+        "Summarize the following document directly without conversational filler or thought processes.\n\n"
         f"Length requirement: {guidance}\n\n"
-        "Strictly use this format:\n"
-        "Summary: <your clean summary text>\n"
+        "Format:\n"
+        "Summary:\n"
+        "[Paragraph summary]\n\n"
         "Key Points:\n"
-        "- <bullet point 1>\n"
-        "- <bullet point 2>\n"
-        "- <bullet point 3>\n\n"
+        "- [Point 1]\n"
+        "- [Point 2]\n"
+        "- [Point 3]\n\n"
         f"Document:\n{truncated}"
     )
 

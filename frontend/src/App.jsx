@@ -10,21 +10,54 @@ const LENGTHS = [
 
 function parseSummary(raw) {
   if (!raw) return { summary: '', points: [] }
-  // Strip any reasoning / thinking tags (<think>...</think>)
-  const cleanRaw = raw.replace(/<think>[\s\S]*?<\/think>/gi, '').replace(/<\/?think>/gi, '').trim()
 
-  const keyIdx = cleanRaw.indexOf('Key Points:')
-  if (keyIdx === -1) {
-    const fallbackSummary = cleanRaw.replace(/^Summary:\s*/i, '').trim()
-    return { summary: fallbackSummary, points: [] }
+  let cleanRaw = raw
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<\/?think>/gi, '')
+    .trim()
+
+  // If there's a preamble ("Here's a thinking process: ..."), cut to where Summary actually starts
+  const summaryMatch = cleanRaw.search(/(?:^|\n)\s*(?:\*\*)?Summary(?:\*\*)?\s*:\s*/i)
+  if (summaryMatch !== -1) {
+    cleanRaw = cleanRaw.slice(summaryMatch).trim()
   }
 
-  const summary = cleanRaw.slice(0, keyIdx).replace(/^Summary:\s*/i, '').trim()
-  const pointsBlock = cleanRaw.slice(keyIdx + 'Key Points:'.length)
+  // Find Key Points header (with or without markdown ** **)
+  const keyMatch = cleanRaw.search(/(?:^|\n)\s*(?:\*\*)?Key Points(?:\*\*)?\s*:\s*/i)
+  if (keyMatch === -1) {
+    const summaryOnly = cleanRaw
+      .replace(/^(?:\*\*)?Summary(?:\*\*)?\s*:\s*/i, '')
+      .replace(/\*\*/g, '')
+      .trim()
+    return { summary: summaryOnly, points: [] }
+  }
+
+  const summary = cleanRaw
+    .slice(0, keyMatch)
+    .replace(/^(?:\*\*)?Summary(?:\*\*)?\s*:\s*/i, '')
+    .replace(/\*\*/g, '')
+    .trim()
+
+  const matchHeader = cleanRaw.match(/(?:^|\n)\s*(?:\*\*)?Key Points(?:\*\*)?\s*:\s*/i)
+  const headerLen = matchHeader ? matchHeader[0].length : 0
+  const pointsBlock = cleanRaw.slice(keyMatch + headerLen)
+
   const points = pointsBlock
     .split('\n')
-    .map((l) => l.replace(/^[-•*]\s*/, '').trim())
-    .filter((l) => l.length > 0 && !l.startsWith('Key Points:') && !l.toLowerCase().includes('format exactly as'))
+    .map((l) =>
+      l
+        .replace(/^[-•*]\s*[-•*]?\s*/, '')
+        .replace(/<bullet point\s*\d*>/gi, '')
+        .replace(/\*\*/g, '')
+        .trim()
+    )
+    .filter(
+      (l) =>
+        l.length > 0 &&
+        !l.toLowerCase().includes('format exactly as') &&
+        !l.toLowerCase().includes('bullet point') &&
+        !l.startsWith('Key Points:')
+    )
 
   return { summary, points }
 }
