@@ -139,6 +139,10 @@ export default function App() {
     generateSummary(newLength)
   }
 
+  const handlePrint = () => {
+    window.print()
+  }
+
   const handleCopy = () => {
     if (!result?.parsed) return
     const { summary, points } = result.parsed
@@ -285,15 +289,23 @@ export default function App() {
 
             <div className="result-header">
               <h2>Summary</h2>
-              <button className="copy-btn" onClick={handleCopy} title="Copy summary">
-                {copied ? (
-                  <span className="copied-text">Copied!</span>
-                ) : (
+              <div className="action-buttons">
+                <button className="copy-btn" onClick={handlePrint} title="Print or save as PDF">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="copy-icon">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231a1.125 1.125 0 0 1-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M3 9.456c0-1.081.768-2.015 1.837-2.175a48.049 48.049 0 0 1 1.913-.247m0 0a48.1 48.1 0 0 1 14.5 0m-14.5 0V3.75C6.75 3.06 7.31 2.5 8 2.5h8c.69 0 1.25.56 1.25 1.25v3.286" />
                   </svg>
-                )}
-              </button>
+                  <span>PDF / Print</span>
+                </button>
+                <button className="copy-btn" onClick={handleCopy} title="Copy summary">
+                  {copied ? (
+                    <span className="copied-text">Copied!</span>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="copy-icon">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H5.25m11.9-3.664A2.251 2.251 0 0 0 15 2.25h-1.5a2.251 2.251 0 0 0-2.15 1.586m5.8 0c.065.21.1.433.1.664v.75h-6V4.5c0-.231.035-.454.1-.664M6.75 7.5H4.875c-.621 0-1.125.504-1.125 1.125v12c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V16.5a9 9 0 0 0-9-9Z" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
             
             <p className="summary-text">{result.parsed.summary}</p>
