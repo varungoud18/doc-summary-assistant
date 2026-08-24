@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
@@ -30,6 +30,21 @@ function parseSummary(raw) {
   const [result, setResult] = useState(null)
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('theme') || 'dark'
+  })
+
+  useEffect(() => {
+    document.body.className = theme
+  }, [theme])
+
+  const toggleTheme = () => {
+    setTheme((prev) => {
+      const next = prev === 'dark' ? 'light' : 'dark'
+      localStorage.setItem('theme', next)
+      return next
+    })
+  }
 
   const handleFile = (f) => {
     if (!f) return
@@ -89,6 +104,17 @@ function parseSummary(raw) {
 
   return (
     <div className="page">
+      <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+        {theme === 'dark' ? (
+          <svg className="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m0 13.5V21M4.93 4.93l1.59 1.59m10.96 10.96 1.59 1.59m-1.59-10.96-1.59 1.59M6.52 17.48l-1.59 1.59M3 12h2.25m13.5 0H21M12 7.5a4.5 4.5 0 1 0 0 9 4.5 4.5 0 0 0 0-9Z" />
+          </svg>
+        ) : (
+          <svg className="theme-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.752 15.002A9.72 9.72 0 0 1 18 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 0 0 3 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 0 0 9.002-5.998Z" />
+          </svg>
+        )}
+      </button>
 
       <header className="header">
         <div>

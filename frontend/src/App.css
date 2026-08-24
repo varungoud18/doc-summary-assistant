@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap');
 
-:root {
+body.dark {
   --bg: #090d16;
   --panel-bg: #111827;
   --border: #1f2937;
@@ -15,6 +15,39 @@
   --success-muted: rgba(16, 185, 129, 0.1);
   --error: #ef4444;
   --error-muted: rgba(239, 68, 68, 0.1);
+
+  /* Component Colors */
+  --input-bg: rgba(17, 24, 39, 0.5);
+  --pill-group-bg: #0b0f19;
+  --pill-selected-bg: #1f2937;
+  --pill-hover-color: #ffffff;
+  --btn-disabled-bg: #1f2937;
+  --title-color: #ffffff;
+}
+
+body.light {
+  --bg: #f9fafb;
+  --panel-bg: #ffffff;
+  --border: #e5e7eb;
+  --border-hover: #d1d5db;
+  --ink: #111827;
+  --ink-soft: #4b5563;
+  --ink-muted: #9ca3af;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-muted: rgba(37, 99, 235, 0.1);
+  --success: #059669;
+  --success-muted: rgba(5, 150, 105, 0.1);
+  --error: #dc2626;
+  --error-muted: rgba(220, 38, 38, 0.1);
+
+  /* Component Colors */
+  --input-bg: #f3f4f6;
+  --pill-group-bg: #e5e7eb;
+  --pill-selected-bg: #ffffff;
+  --pill-hover-color: #000000;
+  --btn-disabled-bg: #e5e7eb;
+  --title-color: #111827;
 }
 
 * {
@@ -31,6 +64,7 @@ body {
   align-items: center;
   justify-content: center;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 .page {
@@ -38,6 +72,38 @@ body {
   max-width: 600px;
   margin: 0 auto;
   padding: 60px 24px;
+  position: relative;
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--ink-soft);
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  border-color: var(--border-hover);
+}
+
+body.light .theme-toggle:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.theme-icon {
+  width: 18px;
+  height: 18px;
 }
 
 /* Professional Clean Header */
@@ -51,7 +117,8 @@ body {
   font-weight: 700;
   margin: 0 0 10px;
   letter-spacing: -0.02em;
-  color: #ffffff;
+  color: var(--title-color);
+  transition: color 0.3s ease;
 }
 
 .header p {
@@ -59,6 +126,7 @@ body {
   color: var(--ink-soft);
   font-size: 15px;
   line-height: 1.5;
+  transition: color 0.3s ease;
 }
 
 /* Clean Dashboard Panel */
@@ -68,12 +136,17 @@ body {
   border-radius: 16px;
   padding: 32px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+body.light .panel {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
 /* File Upload Zone */
 .dropzone {
   border: 1.5px dashed var(--border-hover);
-  background: rgba(17, 24, 39, 0.5);
+  background: var(--input-bg);
   border-radius: 12px;
   padding: 40px 20px;
   text-align: center;
@@ -83,7 +156,7 @@ body {
 
 .dropzone:hover {
   border-color: var(--accent);
-  background: rgba(59, 130, 246, 0.02);
+  background: var(--accent-muted);
 }
 
 .dropzone.active {
@@ -94,7 +167,7 @@ body {
 .dropzone.has-file {
   border-style: solid;
   border-color: var(--success);
-  background: rgba(16, 185, 129, 0.01);
+  background: var(--success-muted);
 }
 
 .dropzone-content {
@@ -112,6 +185,11 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+body.light .upload-icon-wrapper, body.light .doc-icon-wrapper {
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .upload-icon {
@@ -130,7 +208,8 @@ body {
   font-weight: 600;
   font-size: 16px;
   margin: 0;
-  color: #ffffff;
+  color: var(--title-color);
+  transition: color 0.3s ease;
 }
 
 .filename {
@@ -147,6 +226,7 @@ body {
   margin: 0;
   color: var(--ink-muted);
   font-size: 13px;
+  transition: color 0.3s ease;
 }
 
 /* Controls Alignment */
@@ -173,16 +253,18 @@ legend {
   color: var(--ink-soft);
   margin-bottom: 10px;
   padding: 0;
+  transition: color 0.3s ease;
 }
 
 /* Pill Selectors with Solid Contrast */
 .pill-group {
   display: flex;
   gap: 4px;
-  background: #0b0f19;
+  background: var(--pill-group-bg);
   padding: 4px;
   border-radius: 8px;
   border: 1px solid var(--border);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .pill {
@@ -199,13 +281,17 @@ legend {
 }
 
 .pill:hover {
-  color: #ffffff;
+  color: var(--pill-hover-color);
 }
 
 .pill.selected {
-  background: #1f2937;
-  color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background: var(--pill-selected-bg);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+body.dark .pill.selected {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
 }
 
 /* Button Styling */
@@ -220,7 +306,7 @@ legend {
   font-weight: 600;
   font-size: 15px;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color 0.15s ease, transform 0.1s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -230,10 +316,15 @@ legend {
   background: var(--accent-hover);
 }
 
+.submit:not(:disabled):active {
+  transform: scale(0.98);
+}
+
 .submit:disabled {
-  background: #1f2937;
+  background: var(--btn-disabled-bg);
   color: var(--ink-muted);
   cursor: not-allowed;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .submit.secondary {
@@ -241,10 +332,11 @@ legend {
   border: 1px solid var(--border);
   color: var(--ink);
   margin-top: 24px;
+  transition: all 0.2s ease;
 }
 
 .submit.secondary:hover {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--input-bg);
   border-color: var(--border-hover);
 }
 
@@ -277,6 +369,7 @@ legend {
   padding: 4px 10px;
   border-radius: 6px;
   font-weight: 500;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .badge.warn {
@@ -291,17 +384,19 @@ legend {
   margin-bottom: 12px;
   border-bottom: 1px solid var(--border);
   padding-bottom: 12px;
+  transition: border-color 0.3s ease;
 }
 
 .result h2 {
   font-size: 20px;
   font-weight: 600;
   margin: 0;
-  color: #ffffff;
+  color: var(--title-color);
+  transition: color 0.3s ease;
 }
 
 .copy-btn {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--input-bg);
   border: 1px solid var(--border);
   color: var(--ink-soft);
   cursor: pointer;
@@ -315,8 +410,7 @@ legend {
 }
 
 .copy-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
+  color: var(--pill-hover-color);
   border-color: var(--border-hover);
 }
 
@@ -333,15 +427,17 @@ legend {
 .summary-text {
   line-height: 1.6;
   font-size: 15px;
-  color: #d1d5db;
+  color: var(--ink);
   margin: 0 0 24px;
+  transition: color 0.3s ease;
 }
 
 .result h3 {
   font-size: 16px;
   font-weight: 600;
   margin: 24px 0 12px;
-  color: #ffffff;
+  color: var(--title-color);
+  transition: color 0.3s ease;
 }
 
 .points-list {
@@ -350,6 +446,7 @@ legend {
   line-height: 1.6;
   font-size: 14.5px;
   color: var(--ink-soft);
+  transition: color 0.3s ease;
 }
 
 .points-list li {
