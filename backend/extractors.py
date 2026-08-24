@@ -67,9 +67,12 @@ def _extract_with_gemini_vision(file_bytes: bytes, mime_type: Optional[str] = No
         )
 
         gemini_candidates = [
+            "gemini-3.7-flash",
+            "gemini-3.6-flash",
+            "gemini-3.5-flash",
+            "gemini-3.1-flash-image",
+            "gemini-3-pro-image",
             "gemini-2.5-flash",
-            "gemini-2.0-flash",
-            "gemini-1.5-flash-latest",
             "gemini-1.5-flash",
         ]
 
