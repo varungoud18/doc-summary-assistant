@@ -53,7 +53,6 @@ def _extract_with_gemini_vision(file_bytes: bytes, mime_type: Optional[str] = No
     try:
         import google.generativeai as genai
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
 
         # Standardize mime_type for Gemini
         if not mime_type or mime_type == "application/octet-stream":
@@ -67,12 +66,24 @@ def _extract_with_gemini_vision(file_bytes: bytes, mime_type: Optional[str] = No
             "Output only the transcribed document text without conversational comments or introductions."
         )
 
-        response = model.generate_content([
-            {"mime_type": mime_type, "data": file_bytes},
-            prompt,
-        ])
-        if response and response.text:
-            return response.text.strip()
+        gemini_candidates = [
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-1.5-flash-latest",
+            "gemini-1.5-flash",
+        ]
+
+        for m in gemini_candidates:
+            try:
+                model = genai.GenerativeModel(m)
+                response = model.generate_content([
+                    {"mime_type": mime_type, "data": file_bytes},
+                    prompt,
+                ])
+                if response and response.text:
+                    return response.text.strip()
+            except Exception:
+                continue
     except Exception:
         pass
     return ""
