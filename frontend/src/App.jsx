@@ -84,7 +84,6 @@ export default function App() {
   return (
     <div className="page">
       <header className="header">
-        <span className="mark">DS/A</span>
         <div>
           <h1>Document Summary Assistant</h1>
           <p>Upload a PDF or scanned image. Pick a length. Get a summary.</p>
