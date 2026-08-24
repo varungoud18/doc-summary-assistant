@@ -4,6 +4,9 @@ Adding a provider means adding one branch here — the rest of the app never kno
 """
 
 import os
+import json
+import urllib.request
+import urllib.error
 import google.generativeai as genai
 from openai import OpenAI
 
@@ -62,16 +65,33 @@ def _summarize_groq(prompt: str) -> str:
     api_key = os.environ.get("GROQ_API_KEY")
     if not api_key:
         raise SummarizationError("GROQ_API_KEY is not set")
-    # Groq OpenAI-compatible high-speed endpoint
-    client = OpenAI(
-        api_key=api_key,
-        base_url="https://api.groq.com/openai/v1",
-    )
-    response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response.choices[0].message.content
+
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": "DocSummaryAssistant/1.0",
+    }
+    payload = {
+        "model": "llama-3.3-70b-versatile",
+        "messages": [{"role": "user", "content": prompt}],
+    }
+
+    try:
+        req = urllib.request.Request(
+            url,
+            data=json.dumps(payload).encode("utf-8"),
+            headers=headers,
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            return data["choices"][0]["message"]["content"]
+    except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8", errors="ignore")
+        raise SummarizationError(f"Groq API error ({e.code}): {error_body}")
+    except Exception as e:
+        raise SummarizationError(f"Groq request failed: {e}")
 
 
 def _summarize_gemini(prompt: str) -> str:
